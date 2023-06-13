@@ -23,17 +23,20 @@ func main() {
 	}
 	// Swap the route declarations to use the application struct's methods as t
 	// handler functions.
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", app.home)
 	mux.HandleFunc("/snippet", app.showSnippet)
 	mux.HandleFunc("/snippet/create", app.createSnippet)
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+
 	srv := &http.Server{
 		Addr:     *addr,
 		ErrorLog: errorLog,
 		Handler:  mux,
 	}
+
 	infoLog.Printf("Starting server on %s", *addr)
 	err := srv.ListenAndServe()
 	errorLog.Fatal(err)
