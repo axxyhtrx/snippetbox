@@ -13,6 +13,7 @@ type application struct {
 }
 
 func main() {
+
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	flag.Parse()
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
