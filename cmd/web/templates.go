@@ -4,12 +4,22 @@ import (
 	"github.com/axxyhtrx/snippetbox/pkg/models"
 	"html/template"
 	"path/filepath"
+	"time"
 )
 
 // Define a templateData type to act as the holding structure for
 // any dynamic data that we want to pass to our HTML templates.
 // At the moment it only contains one field, but we'll add more
 // to it as the build progresses.
+
+func humanDate(t time.Time) string {
+	return t.Format("02 Jan 2006 at 15:04")
+}
+
+var functions = template.FuncMap{
+	"humanDate": humanDate,
+}
+
 type templateData struct {
 	CurrentYear int
 	Snippet     *models.Snippet
@@ -32,13 +42,15 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 		// and assign it to the name variable.
 		name := filepath.Base(page)
 		// Parse the page template file in to a template set.
-		ts, err := template.ParseFiles(page)
-		if err != nil {
-			return nil, err
-		}
 		// Use the ParseGlob method to add any 'layout' templates to the
 		// template set (in our case, it's just the 'base' layout at the
 		// moment).
+
+		ts, err := template.New(name).Funcs(functions).ParseFiles(page)
+		if err != nil {
+			return nil, err
+		}
+
 		ts, err = ts.ParseGlob(filepath.Join(dir, "*.layout.tmpl"))
 		if err != nil {
 			return nil, err
