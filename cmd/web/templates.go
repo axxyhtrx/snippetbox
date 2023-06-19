@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/axxyhtrx/snippetbox/pkg/models"
 	"html/template"
+	"net/url"
 	"path/filepath"
 	"time"
 )
@@ -22,6 +23,9 @@ var functions = template.FuncMap{
 
 type templateData struct {
 	CurrentYear int
+	Flash       string
+	FormData    url.Values
+	FormErrors  map[string]string
 	Snippet     *models.Snippet
 	Snippets    []*models.Snippet
 }
