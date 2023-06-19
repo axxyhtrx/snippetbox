@@ -2,7 +2,11 @@ package mysql
 
 import (
 	"database/sql"
+	"errors"
 	"github.com/axxyhtrx/snippetbox/pkg/models"
+	"github.com/go-sql-driver/mysql"
+	"golang.org/x/crypto/bcrypt"
+	"strings"
 )
 
 type UserModel struct {
@@ -11,14 +15,57 @@ type UserModel struct {
 
 // We'll use the Insert method to add a new record to the users table.
 func (m *UserModel) Insert(name, email, password string) error {
-	return nil
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	if err != nil {
+		return err
+	}
+	stmt := `INSERT INTO users (name, email, hashed_password, created)
+    VALUES(?, ?, ?, UTC_TIMESTAMP())`
+	_, err = m.DB.Exec(stmt, name, email, string(hashedPassword))
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			if mysqlErr.Number == 1062 && strings.Contains(mysqlErr.Message, "user exist") {
+			}
+			return models.ErrDuplicateEmail
+		}
+	}
+	return err
 }
 
 // We'll use the Authenticate method to verify whether a user exists with
 // the provided email address and password. This will return the relevant
 // user ID if they do.
-func (m *UserModel) Authenticate(email, password string) (int, error) {
-	return 0, nil
+func (u *UserModel) Authenticate(email, password string) (int, error) {
+	// Retrieve the id and hashed password assocaited with the given email.
+	// If no matching email exists, or the user is not active, we return the
+	// ErrInvalidCredentials error.
+	var id int
+	var hashedPw []byte
+	stmt := `SELECT id, hashed_password FROM users WHERE email = ?`
+	row := u.DB.QueryRow(stmt, email)
+	err := row.Scan(&id, &hashedPw)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, models.ErrInvalidCredentials
+		} else {
+			return 0, err
+		}
+	}
+
+	// Check whether the hashed password and plain-text password provided match.
+	// If they don't, we return the ErrInvalidCredentials error.
+
+	err = bcrypt.CompareHashAndPassword(hashedPw, []byte(password))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return 0, models.ErrInvalidCredentials
+		} else {
+			return 0, err
+		}
+	}
+
+	// Otherwise, the password is correct, so return the userID.
+	return id, nil
 }
 
 // We'll use the Get method to fetch details for a specific user based
