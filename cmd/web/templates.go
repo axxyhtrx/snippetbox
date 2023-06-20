@@ -22,7 +22,8 @@ var functions = template.FuncMap{
 }
 
 type templateData struct {
-	AuthenticatedUser int
+	AuthenticatedUser *models.User
+	CSRFToken         string
 	CurrentYear       int
 	Flash             string
 	Form              *forms.Form
@@ -46,6 +47,7 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 		// Extract the file name (like 'home.page.tmpl') from the full file pat
 		// and assign it to the name variable.
 		name := filepath.Base(page)
+
 		// Parse the page template file in to a template set.
 		// Use the ParseGlob method to add any 'layout' templates to the
 		// template set (in our case, it's just the 'base' layout at the
