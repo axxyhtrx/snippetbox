@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"database/sql"
-	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -12,12 +12,12 @@ func newTestDB(t *testing.T) (*sql.DB, func()) {
 	// to use the `multiStatements=true` parameter in our DSN. This instructs
 	// our MySQL database driver to support executing multiple SQL statements
 	// in one db.Exec()` call.
-	db, err := sql.Open("mysql", "test_web:pass@/test_snippetbox?parseTime=true")
+	db, err := sql.Open("mysql", "test_web:pass@/test_snippetbox?parseTime=true&multiStatements=true")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	script, err := ioutil.ReadFile("./testdata/setup.sql")
+	script, err := os.ReadFile("./testdata/setup.sql")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,7 +27,7 @@ func newTestDB(t *testing.T) (*sql.DB, func()) {
 	}
 
 	return db, func() {
-		script, err := ioutil.ReadFile("./testdata/teardown.sql")
+		script, err := os.ReadFile("./testdata/teardown.sql")
 		if err != nil {
 			t.Fatal(err)
 		}

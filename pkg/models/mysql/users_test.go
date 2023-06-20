@@ -24,8 +24,8 @@ func TestUserModelGet(t *testing.T) {
 			userID: 1,
 			wantUser: &models.User{
 				ID:      1,
-				Name:    "Alice Jones",
-				Email:   "Alice Jones@email.com",
+				Name:    "Jones",
+				Email:   "Jones@email.com",
 				Created: time.Date(2018, 12, 23, 17, 25, 22, 0, time.UTC),
 			},
 			wantError: nil,
