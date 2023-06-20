@@ -21,8 +21,8 @@
                          {{if .AuthenticatedUser}}
          <form action='/user/logout' method='POST'>
              <!-- Include the CSRF token -->
-                             <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-               <button>Logout</button>
+               <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+               <button>Logout ({{.AuthenticatedUser.Name}})</button>
          </form>
          {{else}}
              <a href='/user/signup'>Signup</a>
