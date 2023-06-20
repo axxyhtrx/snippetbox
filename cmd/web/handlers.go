@@ -8,6 +8,13 @@ import (
 	"strconv"
 )
 
+func (app *application) ping(w http.ResponseWriter, r *http.Request) {
+	if _, err := w.Write([]byte("OK")); err != nil {
+		app.serverError(w, err)
+		return
+	}
+}
+
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// Because Pat matches the "/" path exactly, we can now remove the manual c
 	// of r.URL.Path != "/" from this handler.
